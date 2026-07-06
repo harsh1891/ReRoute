@@ -1,0 +1,18 @@
+{
+    "AA351": {
+        "alternate_flight_id": "AA351",
+        "passengers_count": 1,
+        "pnr_list": [
+            "PNR100014"
+        ]
+    },
+    "AA141": {
+        "alternate_flight_id": "AA141",
+        "passengers_count": 3,
+        "pnr_list": [
+            "PNR100545",
+            "PNR100627",
+            "PNR100834"
+        ]
+    }
+}

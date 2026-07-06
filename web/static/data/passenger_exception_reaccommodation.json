@@ -1,0 +1,61 @@
+[
+    {
+        "pnr": "PNR100581",
+        "reason": "Re-routed to non-default flight AA137 to optimize path or class",
+        "details": {
+            "canceled_flight": "AA141",
+            "assigned_itinerary": [
+                "AA137",
+                "AA187"
+            ],
+            "assigned_classes": {
+                "AA137": "First",
+                "AA187": "First"
+            },
+            "stops": 1,
+            "arrival_time": "2026-07-04T20:42:00",
+            "class": "Economy",
+            "assigned_class": "First",
+            "pnr_type": "Silver",
+            "name": "Linda Hernandez"
+        }
+    },
+    {
+        "pnr": "PNR100739",
+        "reason": "Re-routed to non-default flight AA231 to optimize path or class",
+        "details": {
+            "canceled_flight": "AA141",
+            "assigned_itinerary": [
+                "AA231"
+            ],
+            "assigned_classes": {
+                "AA231": "First"
+            },
+            "stops": 0,
+            "arrival_time": "2026-07-04T20:54:00",
+            "class": "Economy",
+            "assigned_class": "First",
+            "pnr_type": "Standard",
+            "name": "Elizabeth Rodriguez"
+        }
+    },
+    {
+        "pnr": "PNR100773",
+        "reason": "Re-routed to non-default flight AA311 to optimize path or class",
+        "details": {
+            "canceled_flight": "AA141",
+            "assigned_itinerary": [
+                "AA311"
+            ],
+            "assigned_classes": {
+                "AA311": "First"
+            },
+            "stops": 0,
+            "arrival_time": "2026-07-04T21:02:00",
+            "class": "Economy",
+            "assigned_class": "First",
+            "pnr_type": "VIP",
+            "name": "Barbara Miller"
+        }
+    }
+]

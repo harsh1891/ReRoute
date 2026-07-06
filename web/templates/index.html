@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Re-accommodation System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="glow-container">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-plane-arrival logo-icon"></i>
+                <h2>ReRoute <span class="logo-sub">Quantum</span></h2>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard-tab">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </button>
+                <button class="nav-item" data-tab="rules-tab">
+                    <i class="fa-solid fa-sliders"></i> Rule Profiler
+                </button>
+                <button class="nav-item" data-tab="solutions-tab">
+                    <i class="fa-solid fa-clipboard-list"></i> Solutions View
+                </button>
+                <button class="nav-item" data-tab="benchmark-tab">
+                    <i class="fa-solid fa-chart-line"></i> Benchmark Suite
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="dot pulse-green"></span>
+                    <span>Systems Operational</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <span class="breadcrumb">Airlines Operations / Schedule Change</span>
+                    <h1>Passenger Re-accommodation Console</h1>
+                </div>
+                <div class="quick-actions">
+                    <button id="run-optimization-btn" class="btn btn-primary btn-glow">
+                        <i class="fa-solid fa-bolt"></i> Run Optimizer
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Tab -->
+            <section id="dashboard-tab" class="tab-content active">
+                <div class="metrics-grid">
+                    <div class="metric-card card-glass">
+                        <div class="metric-icon bg-blue"><i class="fa-solid fa-users"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Impacted Passengers</span>
+                            <h3 id="stat-impacted" class="metric-value">---</h3>
+                        </div>
+                    </div>
+                    <div class="metric-card card-glass">
+                        <div class="metric-icon bg-green"><i class="fa-solid fa-user-check"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Re-accommodated</span>
+                            <h3 id="stat-accommodated" class="metric-value">---</h3>
+                        </div>
+                    </div>
+                    <div class="metric-card card-glass">
+                        <div class="metric-icon bg-purple"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Exception List (PNRs)</span>
+                            <h3 id="stat-exceptions" class="metric-value">---</h3>
+                        </div>
+                    </div>
+                    <div class="metric-card card-glass">
+                        <div class="metric-icon bg-yellow"><i class="fa-solid fa-percent"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Success Rate</span>
+                            <h3 id="stat-success" class="metric-value">---</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Network Map Container -->
+                    <div class="grid-card col-span-2 card-glass">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-map-location-dot"></i> Interactive Flight Disruption Map</h3>
+                            <span class="badge badge-error" id="disruption-badge">Cancellations Detected</span>
+                        </div>
+                        <div class="card-body map-body">
+                            <div class="map-wrapper">
+                                <svg id="flight-network-svg" class="network-svg" viewBox="0 0 1000 500">
+                                    <!-- Definitions for arrows and markers -->
+                                    <defs>
+                                        <marker id="arrow" viewBox="0 0 10 10" refX="25" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" opacity="0.6"/>
+                                        </marker>
+                                        <marker id="arrow-canceled" viewBox="0 0 10 10" refX="25" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" opacity="0.8"/>
+                                        </marker>
+                                    </defs>
+                                    <!-- SVG Content will be dynamically populated -->
+                                </svg>
+                                <div class="map-legend">
+                                    <div class="legend-item"><span class="legend-dot hub"></span> Hub</div>
+                                    <div class="legend-item"><span class="legend-dot spoke"></span> Spoke</div>
+                                    <div class="legend-item"><span class="legend-line active"></span> Active Flight</div>
+                                    <div class="legend-item"><span class="legend-line canceled"></span> Canceled Flight</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disruption Info Panel -->
+                    <div class="grid-card card-glass">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-circle-exclamation text-error"></i> Active Disruption Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="disruption-list" id="canceled-flights-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <div class="optimizer-meta card-inner-glass mt-4">
+                                <h4>Optimization Profile</h4>
+                                <div class="meta-row">
+                                    <span>Selected Solver:</span>
+                                    <select id="solver-select" class="form-control">
+                                        <option value="milp">Classical MILP (PuLP / CBC)</option>
+                                        <option value="cqm">Hybrid Quantum CQM (D-Wave dimod)</option>
+                                    </select>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Routing Pre-filter:</span>
+                                    <span class="text-success font-semibold">Enabled (DFS K=3)</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Solving Status:</span>
+                                    <span id="solving-status" class="badge badge-inactive">Idle</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Solve Time:</span>
+                                    <span id="solving-time" class="font-mono">---</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rule Profiler Tab -->
+            <section id="rules-tab" class="tab-content">
+                <div class="rules-grid">
+                    <!-- Passenger Priority Rules -->
+                    <div class="grid-card card-glass">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-user-shield"></i> Passenger Priority Weights</h3>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="rule-enable-priority" checked>
+                                <label for="rule-enable-priority"></label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="slider-group">
+                                <label>Unaccompanied Minor (UM) Priority <span id="val-um" class="slider-val">---</span></label>
+                                <input type="range" id="weight-um" min="500" max="2000" step="100">
+                            </div>
+                            <div class="slider-group">
+                                <label>Special Assistance (WCHR/Elderly) <span id="val-assistance" class="slider-val">---</span></label>
+                                <input type="range" id="weight-assistance" min="200" max="1000" step="50">
+                            </div>
+                            <div class="slider-group">
+                                <label>On-Duty Employee <span id="val-employee" class="slider-val">---</span></label>
+                                <input type="range" id="weight-employee" min="100" max="800" step="50">
+                            </div>
+                            <div class="slider-group">
+                                <label>Loyalty: VIP / Platinum <span id="val-plat" class="slider-val">---</span></label>
+                                <input type="range" id="weight-plat" min="200" max="800" step="50">
+                            </div>
+                            <div class="slider-group">
+                                <label>Loyalty: Gold <span id="val-gold" class="slider-val">---</span></label>
+                                <input type="range" id="weight-gold" min="100" max="500" step="50">
+                            </div>
+                            <div class="slider-group">
+                                <label>Loyalty: Silver <span id="val-silver" class="slider-val">---</span></label>
+                                <input type="range" id="weight-silver" min="50" max="300" step="25">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alternate Flight Penalties -->
+                    <div class="grid-card card-glass">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Flight Penalty Weights</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="slider-group">
+                                <div class="flex-justify-between">
+                                    <label>Delay Weight (pts / hour)</label>
+                                    <div class="toggle-switch small">
+                                        <input type="checkbox" id="rule-enable-delay" checked>
+                                        <label for="rule-enable-delay"></label>
+                                    </div>
+                                </div>
+                                <input type="range" id="weight-delay" min="1" max="50" step="1">
+                                <span id="val-delay" class="slider-val-under">---</span>
+                            </div>
+                            <div class="slider-group">
+                                <div class="flex-justify-between">
+                                    <label>Layover / Connection Penalty</label>
+                                    <div class="toggle-switch small">
+                                        <input type="checkbox" id="rule-enable-connection" checked>
+                                        <label for="rule-enable-connection"></label>
+                                    </div>
+                                </div>
+                                <input type="range" id="weight-connection" min="10" max="200" step="10">
+                                <span id="val-connection" class="slider-val-under">---</span>
+                            </div>
+                            <div class="slider-group">
+                                <div class="flex-justify-between">
+                                    <label>Ancillary Loss Penalty (per service)</label>
+                                    <div class="toggle-switch small">
+                                        <input type="checkbox" id="rule-enable-ancillaries" checked>
+                                        <label for="rule-enable-ancillaries"></label>
+                                    </div>
+                                </div>
+                                <input type="range" id="weight-ancillaries" min="10" max="100" step="5">
+                                <span id="val-ancillaries" class="slider-val-under">---</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upgrade & Carrier Rules -->
+                    <div class="grid-card card-glass">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-plane-up"></i> Class Changes & Carrier Penalties</h3>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="rule-enable-class" checked>
+                                <label for="rule-enable-class"></label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="slider-group">
+                                <label>Downgrade: First to Business <span id="val-f-to-b" class="slider-val">---</span></label>
+                                <input type="range" id="weight-f-to-b" min="100" max="500" step="50">
+                            </div>
+                            <div class="slider-group">
+                                <label>Downgrade: Business to Economy <span id="val-b-to-e" class="slider-val">---</span></label>
+                                <input type="range" id="weight-b-to-e" min="100" max="600" step="50">
+                            </div>
+                            <div class="slider-group">
+                                <div class="flex-justify-between">
+                                    <label>Competitor Carrier Penalty</label>
+                                    <div class="toggle-switch small">
+                                        <input type="checkbox" id="rule-enable-carrier" checked>
+                                        <label for="rule-enable-carrier"></label>
+                                    </div>
+                                </div>
+                                <input type="range" id="weight-competitor" min="50" max="500" step="25">
+                                <span id="val-competitor" class="slider-val-under">---</span>
+                            </div>
+                            <div class="slider-group">
+                                <label>Partner Carrier Penalty <span id="val-partner" class="slider-val">---</span></label>
+                                <input type="range" id="weight-partner" min="10" max="200" step="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Solutions Viewer Tab -->
+            <section id="solutions-tab" class="tab-content">
+                <div class="solutions-layout">
+                    <!-- Solution Type Selectors -->
+                    <div class="solution-tabs">
+                        <button class="sol-tab active" data-sol="default-solution">
+                            <i class="fa-solid fa-list-check"></i> Flight-level Default Mappings
+                        </button>
+                        <button class="sol-tab" data-sol="exceptions-list">
+                            <i class="fa-solid fa-user-minus"></i> PNR Exceptions List
+                        </button>
+                    </div>
+
+                    <!-- Flight Default Mappings Content -->
+                    <div id="default-solution" class="sol-content active">
+                        <div class="flex-justify-between mb-4">
+                            <p class="text-secondary">Default direct relocations for flight-to-flight re-accommodation covering the majority of passengers.</p>
+                            <a href="/static/data/flight_default_reaccommodation.json" download class="btn btn-secondary btn-sm" id="download-default-btn">
+                                <i class="fa-solid fa-file-arrow-down"></i> Export default_solution.json
+                            </a>
+                        </div>
+                        <div class="table-container card-glass">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Canceled Flight</th>
+                                        <th>Alternate Flight</th>
+                                        <th>Route</th>
+                                        <th>Accommodated Count</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="default-mappings-table">
+                                    <tr>
+                                        <td colspan="5" class="text-center py-8">Run optimizer to generate mappings</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Exceptions List Content -->
+                    <div id="exceptions-list" class="sol-content">
+                        <div class="flex-justify-between mb-4">
+                            <p class="text-secondary">Individual exceptions at PNR level (connecting passengers, downgraded class, or unaccommodated exceptions).</p>
+                            <a href="/static/data/passenger_exception_reaccommodation.json" download class="btn btn-secondary btn-sm" id="download-exceptions-btn">
+                                <i class="fa-solid fa-file-arrow-down"></i> Export exceptions_list.json
+                            </a>
+                        </div>
+                        <div class="filter-bar card-glass mb-4">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="pnr-search" placeholder="Search by PNR or Name...">
+                            </div>
+                            <div class="filter-dropdowns">
+                                <select id="filter-priority" class="form-control-sm">
+                                    <option value="">All Priorities</option>
+                                    <option value="UM">Unaccompanied Minor</option>
+                                    <option value="VIP">VIP / Platinum</option>
+                                    <option value="Employee">On-Duty Employee</option>
+                                    <option value="Standard">Standard</option>
+                                </select>
+                                <select id="filter-reason" class="form-control-sm">
+                                    <option value="">All Reasons</option>
+                                    <option value="route">Non-default Route</option>
+                                    <option value="capacity">Unaccommodated (Capacity)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container card-glass">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>PNR</th>
+                                        <th>Passenger Name</th>
+                                        <th>Priority Type</th>
+                                        <th>Disrupted Flight</th>
+                                        <th>Assigned Itinerary</th>
+                                        <th>Reason for Exception</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exceptions-table-body">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-8">Run optimizer to populate exceptions</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Benchmark Tab -->
+            <section id="benchmark-tab" class="tab-content">
+                <div class="benchmark-layout">
+                    <div class="grid-card col-span-3 card-glass mb-6">
+                        <div class="card-header flex-justify-between">
+                            <h3><i class="fa-solid fa-chart-line text-blue"></i> Execution Solve Times vs Passenger Scale</h3>
+                            <button id="trigger-benchmark-btn" class="btn btn-secondary">
+                                <i class="fa-solid fa-play"></i> Run Benchmarking Suite
+                            </button>
+                        </div>
+                        <div class="card-body chart-card-body">
+                            <div class="chart-container">
+                                <canvas id="benchmark-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rules-grid">
+                        <div class="grid-card col-span-2 card-glass">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-brain text-success"></i> Mathematical Speedup Analysis</h3>
+                            </div>
+                            <div class="card-body" id="benchmark-analysis-text">
+                                <p class="text-secondary">Loading analysis...</p>
+                            </div>
+                        </div>
+
+                        <div class="grid-card card-glass">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-scale-balanced text-purple"></i> Solver Equivalence (Convergence)</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="convergence-card card-inner-glass">
+                                    <h4>Formulation Accuracy</h4>
+                                    <p class="text-secondary mt-1">The Hybrid CQM formulation is mathematically equivalent to the classical MILP. At smaller scales (N&le;50), local Simulated Annealing is run on the QUBO mapped space to evaluate quantum compatibility.</p>
+                                    <div class="convergence-stat mt-4">
+                                        <div class="flex-justify-between">
+                                            <span>Convergence Difference (N=50):</span>
+                                            <span id="convergence-score" class="text-success font-semibold">0.00% (Identical)</span>
+                                        </div>
+                                        <div class="progress-bar-container mt-2">
+                                            <div class="progress-bar bg-green" style="width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-secondary text-sm mt-3"><i class="fa-solid fa-circle-info"></i> This proves that mapping the constraints into the Hybrid CQM objective via Lagrange multipliers achieves equivalent solution quality to exact classical algorithms.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
