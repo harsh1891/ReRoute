@@ -17,7 +17,7 @@ Below is a full browser walkthrough of the ReRoute console in action, showing th
 ## 🚀 Key Features
 
 * **Dual-Solver Optimization Engine:** Includes a classical MILP solver (via PuLP/CBC) and a quantum-ready Constrained Quadratic Model (CQM via D-Wave `dimod`) solved via Simulated Annealing.
-* **Graph-Search Pre-filtering:** Uses depth-limited graph traversals (DFS/BFS) to generate candidate itineraries for passengers, enforcing connection buffers (min 45m, max 6h) and limiting paths to a maximum of 2 legs.
+* **Graph-Search Pre-filtering:** Uses depth-limited graph traversals (DFS) to generate candidate itineraries for passengers, enforcing connection buffers (min 45m, max 6h) and limiting paths to a maximum of 2 legs.
 * **Dynamic Rule Engine:** A configurable scoring model that dynamically adjusts solver objectives based on seat downgrades/upgrades, passenger loyalty tiers (VIP, Gold, etc.), unaccompanied minors, and partner carrier penalties.
 * **Interactive Operations Dashboard:** A modern, dark-themed, glassmorphic dashboard showcasing live disruption metrics, an SVG-based flight network map, and real-time solving logs.
 * **Benchmarking Suite:** An automated scale-testing module that benchmarks solver performance from 10 to 1,000 passengers, plotting runtimes and success rates using Chart.js.
@@ -79,7 +79,7 @@ All metrics below are directly reproducible by running the included benchmark su
 
 * **37x Solver Speedup:** At a scale of $N=500$ passengers, optimization runtime was reduced from **2.81 seconds** (unconstrained network flow baseline) to **0.076 seconds** (graph-constrained MILP).
 * **99.82% Variable Reduction:** For a disrupted subset of 11 passengers on a 560-flight network, the decision variable count was reduced from **18,480 down to just 33 variables** by pre-filtering itineraries.
-* **Sub-5ms Graph Routing:** The DFS/BFS routing pre-filter identifies and validates alternative itineraries for the entire network in **4.65 milliseconds** ($N=1,000$).
+* **Sub-5ms Graph Routing:** The DFS routing pre-filter identifies and validates alternative itineraries for the entire network in **4.65 milliseconds** ($N=1,000$).
 * **100% Accommodation Rate:** The Simulated Annealing CQM solver successfully matched the exact classical MILP's 100% passenger re-accommodation rate across all tested scales.
 
 ---
