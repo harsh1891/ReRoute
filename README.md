@@ -24,6 +24,97 @@ Below is a full browser walkthrough of the ReRoute console in action, showing th
 
 ---
 
+## 🏗️ System Architecture & Data Flow
+
+ReRoute uses a modular, layered architecture to decouple the presentation, API routing, graph candidate generation, and mathematical programming layers.
+
+### 1. Modular System Design
+```mermaid
+graph TD
+    classDef frontend fill:#38bdf8,stroke:#0369a1,stroke-width:2px,color:#fff;
+    classDef backend fill:#818cf8,stroke:#4f46e5,stroke-width:2px,color:#fff;
+    classDef solver fill:#c084fc,stroke:#7e22ce,stroke-width:2px,color:#fff;
+    classDef rules fill:#facc15,stroke:#ca8a04,stroke-width:2px,color:#000;
+
+    subgraph Frontend [Presentation Layer]
+        UI[Interactive Dashboard / JS / HTML5]:::frontend
+        MapSVG[Dynamic SVG Flight Map]:::frontend
+        Charts[Benchmark Analytics / Chart.js]:::frontend
+    end
+
+    subgraph WebServer [API & Application Layer]
+        AppServer[Flask App Server: server.py]:::backend
+        Gen[Data Generator: generator.py]:::backend
+    end
+
+    subgraph CoreEngine [Optimization & Search Layer]
+        Router[Graph Search Pre-filter: router.py]:::backend
+        Rules[Priority & Penalty Evaluator: rule_engine.py]:::rules
+        Opt[ReAccommodationOptimizer: optimizer.py]:::backend
+    end
+
+    subgraph Solvers [Mathematical Programming Layer]
+        PuLP[Classical MILP: PuLP / CBC Solver]:::solver
+        CQM[Quantum-Ready CQM: dimod BQM / Simulated Annealing]:::solver
+    end
+
+    UI <-->|JSON POST /api/optimize| AppServer
+    AppServer -->|1. Generate Data| Gen
+    AppServer -->|2. Request Options| Router
+    Router -->|3. Feed Candidate Routes| Opt
+    Opt -->|4. Get Weights & Penalties| Rules
+    Opt -->|5. Solve MILP Model| PuLP
+    Opt -->|6. Solve SA Model| CQM
+    PuLP -->|Return Accommodations| Opt
+    CQM -->|Return Accommodations| Opt
+    Opt -->|Generate Solutions & Exceptions| AppServer
+    AppServer -->|Return JSON Response| UI
+```
+
+---
+
+### 2. Execution Flow Sequence
+When an operator triggers the re-accommodation optimization, the system executes the following synchronous request-response pipeline:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Operator (UI)
+    participant Server as Flask App (server.py)
+    participant Router as Graph Router (router.py)
+    participant Opt as Optimizer (optimizer.py)
+    participant Solver as Solver Engine (PuLP / dimod)
+
+    User->>Server: Click "Run Optimizer" (POST /api/optimize + Rule Profile)
+    activate Server
+    Server->>Router: get_candidate_itineraries_for_passenger(K=3)
+    activate Router
+    Note over Router: Run depth-limited graph traversal (DFS/BFS)<br/>Filter by connection windows & stop limits
+    Router-->>Server: Return Top K valid itineraries per passenger
+    deactivate Router
+
+    Server->>Opt: Initialize ReAccommodationOptimizer with candidates
+    activate Opt
+    Note over Opt: Generate candidate options &<br/>compute objective costs (Rule Engine)
+    
+    Opt->>Solver: Build model variables & constraints (MILP or CQM)
+    activate Solver
+    Note over Solver: Solve program (branch-and-bound or simulated annealing)
+    Solver-->>Opt: Return optimal decision variable values
+    deactivate Solver
+
+    Opt->>Opt: Parse variable outputs into accommodated & exception lists
+    Opt-->>Server: Return parsed optimization results
+    deactivate Opt
+
+    Server->>Server: Group mappings & write JSON logs (static/data/)
+    Server-->>User: Return HTTP 200 JSON (stats, default paths, exceptions)
+    deactivate Server
+    Note over User: Redraw SVG Map (highlights)<br/>Update Metrics & Exceptions tables
+```
+
+---
+
 ## 📊 Algorithmic Performance (Strictly Verified Metrics)
 
 All metrics below are directly reproducible by running the included benchmark suite:
